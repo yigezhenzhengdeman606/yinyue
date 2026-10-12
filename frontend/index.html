@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#eee5d6">
+    <title>Luma · 音乐书屋</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script type="module" src="/static/app.js"></script>
+</head>
+<body>
+<header>
+    <a class="brand" href="/">◒ Luma <small>音乐书屋</small></a>
+    <div class="header-actions">
+        <button id="petSettings">我的宠物</button>
+        <button id="aiSettings">AI 设置</button>
+    </div>
+</header>
+
+<main>
+    <section class="room-heading">
+        <p class="eyebrow">A ROOM FULL OF MELODIES</p>
+        <h1>每一本书，<br>都藏着一段旋律。</h1>
+        <p id="welcome">选一本音乐，让小猫送到你身边。</p>
+        <div class="toolbar">
+            <label class="primary">
+                ＋ 收藏本地音乐
+                <input id="files" type="file" accept="audio/*" multiple hidden>
+            </label>
+            <input id="search" type="search"
+                   placeholder="寻找一本音乐…" aria-label="搜索音乐">
+        </div>
+    </section>
+
+    <section class="room" aria-label="音乐书屋">
+        <div class="window" aria-hidden="true">
+            <div class="sun"></div>
+        </div>
+        <div class="wall-note" aria-hidden="true">
+            slow down<br><span>& listen</span>
+        </div>
+
+        <div class="bookshelf">
+            <div class="shelf-top">
+                <span>THE SOUND LIBRARY</span>
+                <span id="bookCount">0 BOOKS</span>
+            </div>
+            <div id="shelves"></div>
+            <p id="empty" class="empty">
+                书架正在等待第一段旋律。<br>导入音乐，给书屋添一本新书。
+            </p>
+        </div>
+
+        <div class="room-floor" aria-hidden="true"></div>
+
+        <button id="petHome" class="pet-home"
+                aria-label="和宠物互动">
+            <span class="pet-shadow"></span>
+            <span id="homePet" class="pet-face">🐈</span>
+            <span id="petNameLabel">小栗</span>
+        </button>
+
+        <div class="plant" aria-hidden="true">🪴</div>
+    </section>
+
+    <section class="writing">
+        <div>
+            <p class="eyebrow">YOUR NEXT CHAPTER</p>
+            <h2>也可以，写一本自己的歌。</h2>
+            <p>保存歌词草稿，等待它长成旋律。</p>
+        </div>
+        <form id="composeForm">
+            <input id="songTitle" placeholder="作品名称"
+                   maxlength="200" required aria-label="作品名称">
+            <textarea id="lyrics" rows="4" maxlength="10000"
+                      placeholder="写下你的歌词…"
+                      required aria-label="歌词"></textarea>
+            <div class="actions">
+                <button type="button" id="downloadLyrics">下载歌词</button>
+                <button class="primary" type="submit">AI 作曲 · 预留</button>
+            </div>
+        </form>
+    </section>
+</main>
+
+<footer class="player">
+    <div class="playing-info">
+        <div id="playerBook" class="player-book">♫</div>
+        <div class="playing-text">
+            <strong id="nowTitle">等宠物送来一本音乐</strong>
+            <span id="playerStatus">点击书架上的书籍开始</span>
+        </div>
+    </div>
+
+    <div class="player-center">
+        <div class="controls">
+            <button id="previous" aria-label="上一首">⏮</button>
+            <button id="play" class="play" aria-label="播放或暂停">▶</button>
+            <button id="next" aria-label="下一首">⏭</button>
+        </div>
+        <div class="timeline">
+            <span id="elapsed">0:00</span>
+            <div id="progressDock" class="progress-dock">
+                <span id="dockPet" class="dock-pet" hidden>🐈</span>
+                <input id="seek" type="range" min="0" max="100"
+                       value="0" aria-label="播放进度">
+            </div>
+            <span id="duration">0:00</span>
+        </div>
+    </div>
+
+    <div class="player-tools">
+        <button id="openArt">歌曲意境 ↗</button>
+        <input id="volume" type="range" min="0" max="1"
+               step=".01" value=".8" aria-label="音量">
+    </div>
+</footer>
+
+<div id="courier" class="courier" aria-hidden="true" hidden>
+    <span id="carriedBook" class="carried-book" hidden>♫</span>
+    <span id="courierPet" class="courier-pet">🐈</span>
+</div>
+
+<dialog id="petDialog">
+    <form id="petForm" class="dialog-body">
+        <div class="dialog-heading">
+            <h2>你的书屋伙伴</h2>
+            <button type="button" data-close="petDialog" aria-label="关闭">✕</button>
+        </div>
+        <p>它会帮你取书，也会陪你听完整首歌。</p>
+        <label>宠物名字
+            <input id="petName" maxlength="12" required placeholder="给它起个名字">
+        </label>
+        <label>选择伙伴
+            <select id="petType">
+                <option value="cat">小猫 🐈</option>
+                <option value="dog">小狗 🐕</option>
+            </select>
+        </label>
+        <button type="submit" class="primary">带它回书屋</button>
+    </form>
+</dialog>
+
+<dialog id="settingsDialog">
+    <form id="settingsForm" class="dialog-body">
+        <div class="dialog-heading">
+            <h2>AI 设置</h2>
+            <button type="button" data-close="settingsDialog" aria-label="关闭">✕</button>
+        </div>
+        <p>密钥仅发送到本地后端临时保存。</p>
+        <label>API Key
+            <input id="apiKey" type="password" autocomplete="off"
+                   placeholder="使用 .env 时可留空">
+        </label>
+        <label>文本模型
+            <input id="textModel" placeholder="账户支持的文本模型">
+        </label>
+        <label>图片模型
+            <input id="imageModel" placeholder="账户支持的图片模型">
+        </label>
+        <div class="actions">
+            <button id="clearKey" type="button">清除密钥</button>
+            <button type="submit" class="primary">保存配置</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="artDialog">
+    <div class="dialog-body">
+        <div class="dialog-heading">
+            <h2 id="artTitle">歌曲意境</h2>
+            <button data-close="artDialog" aria-label="关闭">✕</button>
+        </div>
+        <div id="artVisual" class="art-visual aurora">
+            <img id="artImage" alt="AI 生成的歌曲意境" hidden>
+            <span class="art-orb"></span>
+        </div>
+        <p id="summary">填写歌词或描述，绘制这本音乐里的世界。</p>
+        <label>歌词或歌曲描述
+            <textarea id="context" rows="3" maxlength="6000"></textarea>
+        </label>
+        <label>意境动画
+            <select id="animation">
+                <option value="auto">AI 自动匹配</option>
+                <option value="aurora">极光</option>
+                <option value="ripple">涟漪</option>
+                <option value="orbit">星轨</option>
+            </select>
+        </label>
+        <button id="generateArt" class="primary">生成意境</button>
+        <p class="small">根据文字生成，不分析音频。会产生 API 费用。</p>
+    </div>
+</dialog>
+
+<audio id="audio" preload="metadata"></audio>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
